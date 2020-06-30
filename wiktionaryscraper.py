@@ -1,12 +1,6 @@
 from wiktionaryparser import WiktionaryParser
 import time
-
-# parser = WiktionaryParser()
-# word = parser.fetch('manok','tagalog')
-# t0 = time.time()
-# print(word[0]['definitions'][0]['partOfSpeech'])
-# t1 = time.time()
-# print ("time: " + str(t1-t0))
+import json
 
 def getPos(entry):
     result = entry[0]['definitions'][0]['partOfSpeech']
@@ -15,12 +9,14 @@ def getPos(entry):
     else:
         return result
 
+
 def getPron(entry):
     result_list = entry[0]['pronunciations']['text']
     if result_list != []:
         return result_list[0]
     else:
         return "n/a"
+
 
 def getDef(entry):
     result_list = entry[0]['definitions'][0]['text']
@@ -29,12 +25,14 @@ def getDef(entry):
     else:
         return "n/a"
 
+
 def getAudio(entry):
     result_list = entry[0]['pronunciations']['audio']
     if result_list != []:
         return result_list[0]
     else:
         return "n/a"
+
 
 def getEx(entry):
     result_list = entry[0]['definitions'][0]['examples']
@@ -43,26 +41,10 @@ def getEx(entry):
     else:
         return "n/a"
 
+
 def getRelated(entry):
     result = entry[0]['definitions'][0]['relatedWords']
     return result
-
-
-
-
-# print('pos:')
-# print(getPos(word))
-# print('\n pronunciations:')
-# print(getPron(word))
-# print('\n definitions:')
-# print(getDef(word))
-# print('\n audio:')
-# print(getAudio(word))
-# print('\n examples:')
-# print(getEx(word))
-# print('\n relatedWords:')
-# print(getRelated(word))
-
 
 
 def generate_json_entry(entry_word):
@@ -77,23 +59,35 @@ def generate_json_entry(entry_word):
                   "audio":getAudio(word)}
     return json_entry
 
-# print (generate_json_entry("manok"))
 
 def main():
     dictionary = []
 
     file = open("conjugated_words.txt", "r")
     lines = file.readlines()
-    for x in (0,4):
-        word = lines[x].rstrip()
-        json_entry = generate_json_entry(word)
-        dictionary.append(json_entry)
-    file.close()
 
-    file2 = open("tagalog_dictionary.txt", "w", encoding="utf-8")
-    json.dump(dictionary, file2, ensure_ascii=False)
-    file2.close()
-    return 1
+    step = 0
+    percent = 0
+    for line in lines:
+        word = line.rstrip()
+        try:
+            json_entry = generate_json_entry(word)
+        except:
+            pass
+        dictionary.append(json_entry)
+        step  += 1
+        if step % 220 == 0:
+            percent += 1
+            file2 = open("tagalog_dictionary.txt", "w", encoding="utf-8")
+            json.dump(dictionary, file2, ensure_ascii=False)
+            print ("Percentage: " + str(percent))
+            print ("Step: " + str(step))
+            file2.close()
+
+    file.close()
+    print ("Finnished")
+
+main()
 
 
 
